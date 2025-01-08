@@ -1,4 +1,4 @@
-At Ink & Switch, one of the things we're researching is a new kind of "dynamic notebook" — something like a pad of paper, but programmable. As part of this research we build a lot of little prototype apps, using web platform as a substrate because the iteration time is really fast. We run these prototypes on iPad because the form factor (tablet + stylus) is very close to what we have in mind for our dynamic notebook.
+At Ink & Switch, one of the things we're researching is a new kind of "dynamic notebook" — something like a pad of paper, but programmable. As part of this research we build a lot of little prototype apps, using the web platform as a substrate because the iteration time is really fast. We run these prototypes on iPad because the form factor (tablet + stylus) is very close to what we have in mind for our dynamic notebook.
 
 On iPad, in the browser, you can't get simultaneous input from fingers and Apple Pencil. It just doesn't work. But this is exactly what we need for our prototypes: fluid, gestural input from both hands and the pen.
 
