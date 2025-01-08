@@ -1,4 +1,4 @@
-We build rapid prototypes using the web platform — typically TypeScript + <canvas>.
+We build rapid prototypes using the web platform — typically TypeScript + `<canvas>`.
 
 But on iPad, in the browser, you can't get simultaneous input from fingers and Apple Pencil. It just doesn't work. But this is exactly what we want for our prototypes: fluid, gestural input from both hands and the pen.
 
@@ -34,7 +34,7 @@ window.wrapperEvents = (events) => {
 }
 ```
 
-For a more detailed example with a few quality-of-life features, see `example.ts`
+For a more detailed example with a few quality-of-life features, see [`example.ts`](/inkandswitch/wrapper/blob/main/example.ts)
 
 ## Tips, Issues, Limitations
 
