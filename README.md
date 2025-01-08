@@ -34,7 +34,7 @@ window.wrapperEvents = (events) => {
 }
 ```
 
-For a more detailed example with a few quality-of-life features, see [`example.ts`](/inkandswitch/wrapper/blob/main/example.ts)
+For a more detailed example with a few quality-of-life features, see [`example.ts`](/blob/main/example.ts)
 
 ## Tips, Issues, Limitations
 
