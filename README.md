@@ -1,4 +1,4 @@
-At Ink & Switch, we research new ways of using a computer for creative problem solving. We build a lot of prototypes, using the web platform as a substrate because it allows for rapid iteration. These prototypes often explore novel user interaction ideas for tablet devices, like the iPad.
+At Ink & Switch, one of the things we're researching is a new kind of "dynamic notebook" — something like a pad of paper, but programmable. As part of this research we build a lot of little prototype apps, using web platform as a substrate because the iteration time is really fast. We run these prototypes on iPad because the form factor (tablet + stylus) is very close to what we have in mind for our dynamic notebook.
 
 On iPad, in the browser, you can't get simultaneous input from fingers and Apple Pencil. It just doesn't work. But this is exactly what we need for our prototypes: fluid, gestural input from both hands and the pen.
 
@@ -6,7 +6,7 @@ Here's our workaround.
 
 This repo contains the Xcode project for a very simple iPad app. It opens a URL of your choice in a fullscreen Webkit view, captures all incoming touch and pencil events on the native/Swift side, then forwards them to your JS code. Your JS code then uses these events instead of the PointerEvents dispatched by the browser.
 
-This project exists to support rapid experimental prototyping. It's deliberately "batteries not included". You should rip it apart, [kitbashing](https://en.wikipedia.org/wiki/Kitbashing) whatever you need to quickly test your ideas, then set it aside and move on.
+This project exists to support rapid experimental prototyping. It's deliberately "batteries not included". You should rip it apart, [kitbashing](https://en.wikipedia.org/wiki/Kitbashing) whatever you need to quickly test your ideas.
 
 ## Setup
 
