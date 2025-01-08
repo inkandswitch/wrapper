@@ -63,16 +63,8 @@ struct WrapperWebView: UIViewRepresentable {
     webView.isInspectable = true
     webView.navigationDelegate = context.coordinator
     webView.addGestureRecognizer(TouchesToJS(webView))
-    loadRequest(webView: webView, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData)
+    webView.load(URLRequest(url: url, cachePolicy: .reloadIgnoringLocalAndRemoteCacheData))
     return webView
-  }
-  
-  private func loadRequest(webView: WKWebView, cachePolicy: URLRequest.CachePolicy) {
-    webView.load(URLRequest(url: url, cachePolicy: cachePolicy))
-  }
-  
-  func orient(_ orientation:Int) {
-    webView.evaluateJavaScript("if ('orient' in window) orient(\(orientation))", completionHandler: nil)
   }
   
   // Required by UIViewRepresentable
@@ -82,20 +74,14 @@ struct WrapperWebView: UIViewRepresentable {
   func makeCoordinator() -> WebViewCoordinator { WebViewCoordinator(self) }
   class WebViewCoordinator: NSObject, WKNavigationDelegate {
     let parent: WrapperWebView
-    var triedOffline = false
+    
     init(_ webView: WrapperWebView) { self.parent = webView }
+    
+    // Handle loading success / failure
     func webView(_ wv: WKWebView, didFinish nav: WKNavigation) { parent.loading = false; }
     func webView(_ wv: WKWebView, didFail nav: WKNavigation, withError error: Error) { parent.error = error }
-    func webView(_ wv: WKWebView, didFailProvisionalNavigation nav: WKNavigation, withError error: Error) {
-      if !triedOffline {
-        // The first time provisional navigation fails, try loading from the browser cache.
-        // This is useful if you're loading an app from a web server and want that to work even when the iPad is offline.
-        triedOffline = true
-        parent.loadRequest(webView: wv, cachePolicy: .returnCacheDataDontLoad)
-      } else {
-        parent.error = error
-      }
-    }
+    func webView(_ wv: WKWebView, didFailProvisionalNavigation nav: WKNavigation, withError error: Error) { parent.error = error }
+
     // This makes the webview ignore certificate errors, so you can use a self-signed cert for https, so that the browser context is trusted, which enables additional APIs
     func webView(_ wv: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {
       (.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))

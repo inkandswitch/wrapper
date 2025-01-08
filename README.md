@@ -1,20 +1,20 @@
-We build rapid prototypes using the web platform — typically TypeScript + `<canvas>`.
+At Ink & Switch, we research new ways of using a computer for creative problem solving. We build a lot of prototypes, using the web platform as a substrate because it allows for rapid iteration. These prototypes often explore novel user interaction ideas for tablet devices, like the iPad.
 
-But on iPad, in the browser, you can't get simultaneous input from fingers and Apple Pencil. It just doesn't work. But this is exactly what we want for our prototypes: fluid, gestural input from both hands and the pen.
+On iPad, in the browser, you can't get simultaneous input from fingers and Apple Pencil. It just doesn't work. But this is exactly what we need for our prototypes: fluid, gestural input from both hands and the pen.
 
 Here's our workaround.
 
-This repo contains the Xcode project for a very simple iPad app. It opens a Webkit view to a URL of your choice, captures all incoming touch and pencil events on the native/Swift side, then forwards them to the JS code running in the Webkit view. Your JS code then uses these events instead of the PointerEvents dispatched by the browser.
+This repo contains the Xcode project for a very simple iPad app. It opens a URL of your choice in a fullscreen Webkit view, captures all incoming touch and pencil events on the native/Swift side, then forwards them to your JS code. Your JS code then uses these events instead of the PointerEvents dispatched by the browser.
 
-The iPad app is minimal. Easy to get up and running for a new prototype. Easy to modify as the needs of the prototype change.
+This project exists to support rapid experimental prototyping. It's deliberately "batteries not included". You should rip it apart, [kitbashing](https://en.wikipedia.org/wiki/Kitbashing) whatever you need to quickly test your ideas, then set it aside and move on.
 
 ## Setup
 
-#### 1. Build the iPad app
+### 1. Build the iPad app
 
 1. Clone this repo to your Mac, and open `Wrapper.xcodeproj` in Xcode.
 
-2. In `Wrapper.swift`, at the top, set the URL of your web app. Typically, you'll use the local IP / mDNS of a live-reloading dev server on your Mac (eg: [vite](https://vite.dev)).
+2. In [`Wrapper.swift`](/Wrapper/Wrapper.swift), at the top, set the URL of your web app. Typically, you'll use the local IP / mDNS of a live-reloading dev server on your Mac (eg: [vite](https://vite.dev)).
 
 3. Set a [run destination](https://developer.apple.com/documentation/xcode/building-and-running-an-app) (ie: tell Xcode to run your app on your iPad).
 
@@ -22,9 +22,11 @@ You *might* also need to do the following.
 
 4. In Signing & Capabilities, set a [Team and Bundle Identifier](https://developer.apple.com/documentation/xcode/preparing-your-app-for-distribution). The latter should be globally unique.
 
-#### 2. Receive the events in your web app
+Finally, do a `Build & Run` and if everything goes well, the app should launch on your iPad, and you'll see whatever is being served at the URL you entered.
 
-The iPad app will collect all the input events that occur within a short window of time (say, 1 frame at 120 Hz), then call the function `window.wrapperEvents(...)` with those events. Here's how you'd receive them in your web app:
+### 2. Receive the pencil & touch events in your web app
+
+The iPad Pro emits finger events at 120 Hz and pencil events at 240 Hz. The app will batch-up all the input events that occur within a short window of time (say, 1 frame at 120 Hz), then call the function `window.wrapperEvents(...)` with each batch of events. Here's how you'd receive them in your web app:
 
 ```javascript
 window.wrapperEvents = (events) => {
@@ -38,18 +40,20 @@ For a more detailed example with a few quality-of-life features, see [`example.t
 
 ## Usage Notes
 
-#### Tips
-* The events array passed to `window.wrapperEvents(...)` will interleave pencil and touch events, and (with one exception) all events arrive in the order they occur. The exception is that some events are extrapolated *predictions* of where the pencil might go in the near future. These events will have `event.predicted === true`. In the following batch of events, you will get the real position that the pencil ended up going.
+### Tips
 * Once you have the app installed on your iPad, you don't need to run Xcode again. Just make sure your dev server is running (ie: run `vite` or whatever), then launch the app. If something goes wrong, force quit the app (swipe it upward on the app switcher) and try again.
+* The events array passed to `window.wrapperEvents(...)` will interleave pencil and touch events, and (with one exception) all events arrive in the order they occur.
+  * The exception is that some events are extrapolated *predictions* of where the pencil might go in the near future. These events will have `event.predicted === true`. In the following batch of events, you will get the real position that the pencil ended up going.
+* The events come in *fast*. It's a good idea to merge events together, and only act on the most current data for each touch.
 * You can use the Safari developer tools to remotely debug your app while it runs in the browser. This tends to work well for seeing logs, inspecting elements, etc. It does not work very well at all for inspecting JS perf via the timeline. It can also be a bit finicky to get connected — using a cable is not strictly necessary, but it often helps.
 
-#### Limitations
-* In our informal measurements, we typically see 3–4 frames of motion-to-photon latency using the Wrapper with WebGL. Your mileage may vary.
-* The Webkit view is "batteries not included". You can't use stuff like `alert()` / `prompt()`, the clipboard, the `download` attr, etc… unless you implement support for that in Swift.
+### Limitations
+* You can't use stuff like `alert()` / `prompt()`, the clipboard, the `download` attr, etc… unless you implement support for that in Swift.
 * The iPad Pro refreshes at 120 Hz. As of iOS 18, you can enable a feature flag to allow Safari to run at 120 Hz. But this feature flag doesn't apply to the Webkit view we use — you're stuck at 60 Hz. We don't know of any way to run at 120 Hz in this Wrapper. (If you figure this out, PLEASE tell us!)
 * Pencil input is imperfect. While rare, we've sometimes struggled with dropped or sticky inputs, possibly due to false positives/negatives from palm rejection. (If you spot a way to improve this, PLEASE tell us!)
+* In our informal measurements, we typically see 3–4 frames of motion-to-photon latency using the Wrapper with WebGL. This is about on par with using PointerEvents generated by the browser. Your mileage may vary.
 
-#### "Help!!"
+### "Help!!"
 
 We don't offer any warranty or support for this project. But, feel free to ping [Ivan](http://mastodon.social/@spiralganglion) on Mastodon if you have quick questions, or want to share something cool you've made.
 
