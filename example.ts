@@ -14,7 +14,7 @@
 export type TouchId = number
 
 export type WrapperEventType = "pencil" | "finger"
-export type WrapperEventPhase = "began" | "moved" | "ended"
+export type WrapperEventPhase = "hover" | "began" | "moved" | "ended"
 export type Position = { x: number,  y: number }
 
 export type WrapperEvent = {
@@ -23,6 +23,7 @@ export type WrapperEvent = {
   phase: WrapperEventPhase
   predicted: boolean
   position: Position
+  hoverHeight: number
   pressure: number
   altitude: number
   azimuth: number
@@ -46,8 +47,7 @@ function pointerEvent(e: PointerEvent, phase: WrapperEventPhase) {
   if (phase === "began") pointerDown = true
   if (phase === "ended") pointerDown = false
 
-  // The Wrapper doesn't support pencil hover (yet), so for consistency sake we only keep pointer drags, not pointer moves.
-  if (phase === "moved" && !pointerDown) return
+  if (phase === "moved" && !pointerDown) phase = "hover"
 
   const type = e.pointerType == "touch" || spaceBarDown ? "finger" : "pencil"
 
@@ -61,6 +61,7 @@ function pointerEvent(e: PointerEvent, phase: WrapperEventPhase) {
     phase,
     predicted: false,
     position: { x: e.clientX, y: e.clientY },
+    hoverHeight: .5,
     pressure,
     altitude: 0,
     azimuth: 0,

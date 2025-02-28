@@ -89,46 +89,72 @@ struct WrapperWebView: UIViewRepresentable {
   }
 }
 
-// This class captures all the touch events triggered on a given WKWebView, and re-triggeres them inside the JS context.
+// This class captures gesture events triggered on a given WKWebView, and re-triggeres them inside its JS context.
 // This allows JS to receive pencil and touch simultaneously.
 class TouchesToJS: UIGestureRecognizer {
+  
   let webView: WKWebView
+  let hoverRecognizer: UIHoverGestureRecognizer
   
   init(_ webView: WKWebView) {
     self.webView = webView
+    self.hoverRecognizer = UIHoverGestureRecognizer(target: nil, action: nil)
     super.init(target:nil, action:nil)
+    
     requiresExclusiveTouchType = false // Allow simultaneous pen and touch events
+    
+    webView.addGestureRecognizer(self)
+    hoverRecognizer.addTarget(self, action: #selector(handleHover))
+    webView.addGestureRecognizer(hoverRecognizer)
   }
   
   typealias TouchJSON = [String: AnyHashable]
-  
-  private func makeTouchJSON(id: Int, phase: String, touch: UITouch) -> TouchJSON {
-    let location = touch.preciseLocation(in: view)
-    return [
-      "id": id,
-      "type": touch.type == .pencil ? "pencil" : "finger",
-      "phase": phase,
-      "position": [
-        "x": location.x,
-        "y": location.y,
-      ],
-      "pressure": touch.force,
-      "altitude": touch.altitudeAngle,
-      "azimuth": touch.azimuthAngle(in: view),
-      "rollAngle": touch.rollAngle,
-      "radius": touch.majorRadius,
-      "timestamp": touch.timestamp
-    ]
-  }
-  
+    
   func sendTouches(_ phase: String, _ touches: Set<UITouch>, _ event: UIEvent) {
     for touch in touches {
-      let id = touch.hashValue // These ids *should be* stable until the touch ends (ie: finger or pencil is lifted)
-      let jsonArr = event.coalescedTouches(for: touch)!.map({ makeTouchJSON(id: id, phase: phase, touch: $0) })
-      if let json = try? JSONSerialization.data(withJSONObject: jsonArr),
-         let jsonString = String(data: json, encoding: .utf8) {
-        webView.evaluateJavaScript("if ('wrapperEvents' in window) wrapperEvents(\(jsonString))")
+      let id = touch.hashValue
+      let coalesced = event.coalescedTouches(for: touch) ?? [touch]
+      let jsonArr = coalesced.map { t -> TouchJSON in
+        let location = t.preciseLocation(in: webView)
+        return [
+          "id": id,
+          "type": t.type == .pencil ? "pencil" : "finger",
+          "phase": phase,
+          "position": ["x": location.x, "y": location.y],
+          "hoverHeight": 0,
+          "pressure": t.force,
+          "altitude": t.altitudeAngle,
+          "azimuth": t.azimuthAngle(in: webView),
+          "rollAngle": t.rollAngle,
+          "radius": t.majorRadius,
+          "timestamp": t.timestamp,
+        ]
       }
+      sendToJS(jsonArr)
+    }
+  }
+  
+  @objc func handleHover(_ recognizer: UIHoverGestureRecognizer) {
+    let location = recognizer.location(in: webView)
+    sendToJS([[
+      "id": recognizer.hashValue,
+      "type": "pencil",
+      "phase": "hover",
+      "position": ["x": location.x, "y": location.y],
+      "hoverHeight": recognizer.zOffset,
+      "pressure": 0,
+      "altitude": recognizer.altitudeAngle,
+      "azimuth": recognizer.azimuthAngle(in: webView),
+      "rollAngle": recognizer.rollAngle,
+      "radius": 0,
+      "timestamp": 0,
+    ]])
+  }
+
+  func sendToJS(_ jsonArr: [TouchJSON]) {
+    if let data = try? JSONSerialization.data(withJSONObject: jsonArr),
+       let jsonString = String(data: data, encoding: .utf8) {
+      webView.evaluateJavaScript("if ('wrapperEvents' in window) wrapperEvents(\(jsonString))")
     }
   }
   
