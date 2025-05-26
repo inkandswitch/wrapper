@@ -38,6 +38,33 @@ window.wrapperEvents = (events) => {
 
 For a more detailed example with a few quality-of-life features, see [`example.ts`](/example.ts)
 
+### 3. Submit to TestFlight
+
+After you've built something, you might want to share it with other folks so they can test it. Here are the steps for setting up a private TestFlight.
+
+Prerequisites:
+* A paid Apple developer team account that you are willing to share with your testers.
+* You must have the Admin or App Manager role on this Apple developer team.
+* The email address for the Apple IDs for each of your testers, so you can add them to your team.
+
+Steps:
+1. Put a build of your web app somewhere on the internet — Surge, Netlify, Vercel, S3, doesn't matter.
+2. In Xcode, change [`Wrapper.swift`](/Wrapper/Wrapper.swift) to load this URL.
+3. Choose `Product > Archive`. This will build your project, then open the Organizer window.
+4. Click "Validate App". Xcode may prompt you to fill in some basic info for the App Store.
+5. If Validation fails, go fix whatever issues it surfaces.
+  * The most common issue is that your bundle identifier isn't unique. Change it to something unique. (Note that you actually have to click somewhere outside the bundle identifier field for it to save the new value.) Then go back to step 3.
+6. Once Validation succeeds, click "Distribute App". The default method ("App Store Connect") is fine.
+7. When the upload finishes, click the link to open your app in App Store Connect. At the top, click the big TestFlight link.
+8. You should see a list of versions and a single build, and it should say "Missing Compliance". Click "Manage", and choose "None of the above".
+9. Open [Users and Access](https://appstoreconnect.apple.com/access/users) in a new tab, and create a New User for each of your testers. Give them the Developer role.
+10. Go back to your app in TestFlight. In the left sidebar look for "Internal Testing", then click the blue (+) icon to create a group of users to test the app. Give your group a name.
+11. You'll be presented with a list of users on your team. Select your testers.
+
+That should be all it takes. As soon as people are added to the group, they'll get an invite email.
+
+In our experience, this process is cumbersome and error-prone. Just give it your best shot. If something doesn't work, wait a few days and try again.
+
 ## Usage Notes
 
 ### Tips
