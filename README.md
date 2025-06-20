@@ -56,10 +56,9 @@ Steps:
   * The most common issue is that your bundle identifier isn't unique. Change it to something unique. (Note that you actually have to click somewhere outside the bundle identifier field for it to save the new value.) Then go back to step 3.
 6. Once Validation succeeds, click "Distribute App". The default method ("App Store Connect") is fine.
 7. When the upload finishes, click the link to open your app in App Store Connect. At the top, click the big TestFlight link.
-8. You should see a list of versions and a single build, and it should say "Missing Compliance". Click "Manage", and choose "None of the above".
-9. Open [Users and Access](https://appstoreconnect.apple.com/access/users) in a new tab, and create a New User for each of your testers. Give them the Developer role.
-10. Go back to your app in TestFlight. In the left sidebar look for "Internal Testing", then click the blue (+) icon to create a group of users to test the app. Give your group a name.
-11. You'll be presented with a list of users on your team. Select your testers.
+8. In a new tab, open [Users and Access](https://appstoreconnect.apple.com/access/users), and create a New User for each of your testers. Give them the Developer role.
+9. Go back to your app in TestFlight. In the left sidebar look for "Internal Testing", then click the blue (+) icon to create a group of users to test the app. Give your group a name.
+10. You'll be presented with a list of users on your team. Select your testers.
 
 That should be all it takes. As soon as people are added to the group, they'll get an invite email.
 
